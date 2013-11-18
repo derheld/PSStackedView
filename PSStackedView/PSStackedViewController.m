@@ -1052,7 +1052,6 @@ enum {
     }
     if (IS_IOS7){
         CGRect viewRect = viewController.view.frame;
-        viewRect.size.height -= 20;
         viewRect.origin.y += 20;
         viewController.view.frame = viewRect;
     }
