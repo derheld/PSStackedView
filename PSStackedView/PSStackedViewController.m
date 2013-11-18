@@ -34,7 +34,7 @@ typedef void(^PSSVSimpleBlock)(void);
     BOOL snapBackFromLeft_;
     NSInteger lastDragOffset_;
     BOOL lastDragDividedOne_;
-    NSInteger lastVisibleIndexBeforeRotation_;   
+    NSInteger lastVisibleIndexBeforeRotation_;
     BOOL enableBounces_;
     struct {
         unsigned int delegateWillInsertViewController:1;
@@ -90,7 +90,7 @@ typedef void(^PSSVSimpleBlock)(void);
     {
         [panRecognizer setMinimumNumberOfTouches:numberOfTouches_];
     } else {
-        [panRecognizer setMaximumNumberOfTouches:1];            
+        [panRecognizer setMaximumNumberOfTouches:1];
     }
     [panRecognizer setDelaysTouchesBegan:NO];
     [panRecognizer setDelaysTouchesEnded:YES];
@@ -130,13 +130,13 @@ typedef void(^PSSVSimpleBlock)(void);
         method_exchangeImplementations(origMethod, overrideMethod);
     });
 #endif
-
+    
 }
 
 - (id)init {
     
     if ((self = [super init])) {
-    
+        
         [self sharedInitialization];
         
     }
@@ -159,7 +159,7 @@ typedef void(^PSSVSimpleBlock)(void);
         
         [self setRootViewController:rootViewController];
         [self sharedInitialization];
-
+        
     }
     return self;
 }
@@ -201,7 +201,7 @@ typedef void(^PSSVSimpleBlock)(void);
         delegateFlags_.delegateDidRemoveViewController = [delegate respondsToSelector:@selector(stackedView:didRemoveViewController:)];
         delegateFlags_.delegateDidPanViewController = [delegate respondsToSelector:@selector(stackedView:didPanViewController:byOffset:)];
         delegateFlags_.delegateDidAlign = [delegate respondsToSelector:@selector(stackedViewDidAlign:)];
-
+        
     }
 }
 
@@ -248,10 +248,15 @@ typedef void(^PSSVSimpleBlock)(void);
     NSInteger firstVisibleIndex = floorf(self.floatIndex);
     return firstVisibleIndex;
 }
+#define IS_IOS7 [[UIDevice currentDevice].systemVersion hasPrefix:@"7"]
 
 - (CGRect)viewRect {
     // self.view.frame not used, it's wrong in viewWillAppear
     CGRect viewRect = [[UIScreen mainScreen] applicationFrame];
+    if (IS_IOS7){
+        viewRect.size.height -= 20;
+    }
+    
     return viewRect;
 }
 
@@ -308,7 +313,7 @@ typedef void(^PSSVSimpleBlock)(void);
     return isVCVisible;
 }
 
-// returns view controller that is displayed before viewController 
+// returns view controller that is displayed before viewController
 - (UIViewController *)previousViewController:(UIViewController *)viewController {
     if(!viewController) // don't assert on mere menu events
         return nil;
@@ -322,7 +327,7 @@ typedef void(^PSSVSimpleBlock)(void);
     return prevVC;
 }
 
-// returns view controller that is displayed after viewController 
+// returns view controller that is displayed after viewController
 - (UIViewController *)nextViewController:(UIViewController *)viewController {
     NSParameterAssert(viewController);
     
@@ -335,7 +340,7 @@ typedef void(^PSSVSimpleBlock)(void);
     return nextVC;
 }
 
-// returns last visible view controller. this *can* be the last view controller in the stack, 
+// returns last visible view controller. this *can* be the last view controller in the stack,
 // but also one of the previous ones if the user navigates back in the stack
 - (UIViewController *)lastVisibleViewControllerCompletelyVisible:(BOOL)completely {
     __block UIViewController *lastVisibleViewController = nil;
@@ -624,7 +629,7 @@ enum {
     
     self.floatIndex = 0.0f;
     [self alignStackAnimated:YES];
-
+    
 }
 
 // iterates controllers and sets width (also, enlarges if requested width is larger than current width)
@@ -648,7 +653,7 @@ enum {
 }
 
 // updates view containers
-- (void)updateViewControllerMasksAndShadow {   
+- (void)updateViewControllerMasksAndShadow {
     if (enableShadows_ == YES) {
         // only one!
         if ([self.viewControllers count] == 1) {
@@ -705,7 +710,7 @@ enum {
 }
 
 - (NSArray *)visibleViewControllersSetFullyVisible:(BOOL)fullyVisible; {
-    NSMutableArray *array = [NSMutableArray array];    
+    NSMutableArray *array = [NSMutableArray array];
     [self.viewControllers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if ([self isViewControllerVisible:obj completely:fullyVisible]) {
             [array addObject:obj];
@@ -770,7 +775,7 @@ enum {
     }];
 }
 
-// moves the stack to a specific offset. 
+// moves the stack to a specific offset.
 - (void)moveStackWithOffset:(NSInteger)offset animated:(BOOL)animated userDragging:(BOOL)userDragging {
     PSSVLog(@"moving stack on %d pixels (animated:%d, decellerating:%d)", offset, animated, userDragging);
     
@@ -788,7 +793,7 @@ enum {
         [self.viewControllers enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             UIViewController *currentViewController = (UIViewController *)obj;
             UIViewController *leftViewController = [self previousViewController:currentViewController];
-            UIViewController *rightViewController = [self nextViewController:currentViewController];        
+            UIViewController *rightViewController = [self nextViewController:currentViewController];
             NSInteger minimalLeftInset = [self minimalLeftInset];
             
             // we just move the top view controller
@@ -845,7 +850,7 @@ enum {
         }
         
         // calculate float index
-        NSUInteger newFirstVisibleIndex = lastViewController ? [self indexOfViewController:lastViewController] : 0;         
+        NSUInteger newFirstVisibleIndex = lastViewController ? [self indexOfViewController:lastViewController] : 0;
         CGFloat floatIndex = [self nearestValidFloatIndex:newFirstVisibleIndex]; // absolut value
         
         CGFloat overlapRatio = 0.f;
@@ -881,7 +886,7 @@ enum {
     } completion:nil];
 }
 
-- (void)handlePanFrom:(UIPanGestureRecognizer *)recognizer {    
+- (void)handlePanFrom:(UIPanGestureRecognizer *)recognizer {
     CGPoint translatedPoint = [recognizer translationInView:self.view];
     UIGestureRecognizerState state = recognizer.state;
     
@@ -919,7 +924,7 @@ enum {
 	    if (lastDragOption_ == SVSnapOptionUndecided) {
 		    lastDragOption_ = [self snapOptionFromOffset:offset];
 	    }
-
+        
 	    // if there's a continuous drag in one direction, keep designation - else use nearest to snap.
 	    if ((lastDragOption_ == SVSnapOptionLeft && offset > 0) || (lastDragOption_ == SVSnapOptionRight && offset < 0)) {
 		    lastDragOption_ = SVSnapOptionNearest;
@@ -937,7 +942,7 @@ enum {
 	    if (lastDragOption_ == SVSnapOptionUndecided) {
 		    lastDragOption_ = SVSnapOptionNearest;
 	    }
-
+        
         if (lastDragOption_ == SVSnapOptionRight) {
             self.floatIndex = [self nearestValidFloatIndex:self.floatIndex round:PSSVRoundDown];
             if (_disablePartialFloat) {
@@ -957,7 +962,7 @@ enum {
 	if (self.alwaysSnapToNearest) {
 		return PSSVRoundNearest;
 	}
-
+    
 	if (offset > 0) {
 		return SVSnapOptionRight;
 	}
@@ -1008,7 +1013,7 @@ enum {
     [self pushViewController:viewController fromViewController:self.topViewController animated:animated];
 }
 
-- (void)pushViewController:(UIViewController *)viewController fromViewController:(UIViewController *)baseViewController animated:(BOOL)animated; {    
+- (void)pushViewController:(UIViewController *)viewController fromViewController:(UIViewController *)baseViewController animated:(BOOL)animated; {
     // figure out where to push, and if we need to get rid of some viewControllers
     if (baseViewController) {
         [self.viewControllers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
@@ -1029,10 +1034,11 @@ enum {
     }
     
     [self addChildViewController:viewController];
-    PSSVLog(@"pushing with index %d on stack: %@ (animated: %d)", [self.viewControllers count], viewController, animated);    
+    PSSVLog(@"pushing with index %d on stack: %@ (animated: %d)", [self.viewControllers count], viewController, animated);
     viewController.view.height = [self screenHeight];
-
+    
     [viewController view]; //trigger viewDidload to ensure we get stack width
+    
     
     // get predefined stack width; query topViewController if we have a UINavigationController
     CGFloat stackWidth = viewController.stackWidth;
@@ -1044,15 +1050,18 @@ enum {
     if (stackWidth > 0.f) {
         viewController.view.width = stackWidth;
     }
-    
+    if (IS_IOS7){
+        CGRect viewRect = viewController.view.frame;
+        viewRect.size.height -= 20;
+        viewRect.origin.y += 20;
+        viewController.view.frame = viewRect;
+    }
     // Starting out in portrait, right side up, we see a 20 pixel gap (for status bar???)
-    viewController.view.top = 0.f;
-    
     [self delegateWillInsertViewController:viewController];
     
     // controller view is embedded into a container
     PSSVContainerView *container = [PSSVContainerView containerViewWithController:viewController];
-    NSUInteger leftGap = [self totalStackWidth] + [self minimalLeftInset];    
+    NSUInteger leftGap = [self totalStackWidth] + [self minimalLeftInset];
     container.left = leftGap;
     container.width = viewController.view.width;
     container.autoresizingMask = UIViewAutoresizingFlexibleHeight; // width is not flexible!
@@ -1077,7 +1086,7 @@ enum {
         [viewController didMoveToParentViewController:self];
         [self delegateDidInsertViewController:viewController];
     };
-        
+    
     if (animated) {
         [UIView animateWithDuration:kPSSVStackAnimationPushDuration delay:0.f options:UIViewAnimationOptionAllowUserInteraction animations:^{
             container.alpha = 1.f;
@@ -1123,7 +1132,7 @@ enum {
         
         PSSVSimpleBlock finishBlock = ^{
             [container removeFromSuperview];
-            [lastController removeFromParentViewController]; 
+            [lastController removeFromParentViewController];
             [self delegateDidRemoveViewController:lastController];
         };
         
@@ -1143,7 +1152,7 @@ enum {
             finishBlock();
         }
         
-        [viewControllers_ removeLastObject];        
+        [viewControllers_ removeLastObject];
         
         // save current stack controller as an associated object.
         objc_setAssociatedObject(lastController, kPSSVAssociatedStackViewControllerKey, nil, OBJC_ASSOCIATION_ASSIGN);
@@ -1261,7 +1270,7 @@ enum {
     PSSVBounceNone,
     PSSVBounceMoveToInitial,
     PSSVBounceBleedOver,
-    PSSVBounceBack,    
+    PSSVBounceBack,
 }typedef PSSVBounceOption;
 
 - (void)alignStackAnimated:(BOOL)animated duration:(CGFloat)duration bounceType:(PSSVBounceOption)bounce {
@@ -1349,7 +1358,7 @@ enum {
                             options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | animationCurve
                          animations:alignmentBlock completion:^(BOOL finished) {
                              /*  Scroll physics are applied here. Drag speed is saved in lastDragOffset. (direction with +/-, speed)
-                              *  If we are above a certain speed, we "shoot over the target", then snap back. 
+                              *  If we are above a certain speed, we "shoot over the target", then snap back.
                               *  This is of course dependent on the direction we scrolled.
                               *
                               *  Right swiping (collapsing) makes the next vc overlapping the current vc a few pixels.
@@ -1359,7 +1368,7 @@ enum {
                               *   1) scroll to correct position
                               *   2) bleed over
                               *   3) snap back to correct position
-                              */        
+                              */
                              if (finished && [self shouldSnapAnimate]) {
                                  CGFloat animationDuration = kPSSVStackAnimationBounceDuration/2.f;
                                  switch (bounce) {
@@ -1376,7 +1385,7 @@ enum {
                                          [self delegateDidAlign];
                                      case PSSVBounceBack:
                                          [self delegateDidAlign];
-
+                                         
                                      default: {
                                          lastDragOffset_ = 0; // clear last drag offset for the animation
                                          //[self removeAnimationBlockerView];
@@ -1385,7 +1394,7 @@ enum {
                              }else if(finished){
                                  
                                  [self delegateDidAlign];
-
+                                 
                              }
                              
                          }
@@ -1394,7 +1403,7 @@ enum {
     else {
         alignmentBlock();
         //[self delegateDidAlign];
-
+        
     }
     
 }
@@ -1466,7 +1475,7 @@ enum {
     self.floatIndex = MIN(newFloatIndex, self.floatIndex);
     
     [self alignStackAnimated:animated];
-    return steps; 
+    return steps;
 }
 
 - (void)setNumberOfTouches:(NSUInteger)numberOfTouches
@@ -1499,11 +1508,14 @@ enum {
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    
+    
     // embedding rootViewController
     if (self.rootViewController) {
         [self addChildViewController:self.rootViewController];
         [self.view addSubview:self.rootViewController.view];
         self.rootViewController.view.frame = self.view.bounds;
+        NSLog(@"RootView: %@ Self: %@", self.rootViewController.view, self.view);
         self.rootViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self.rootViewController didMoveToParentViewController:self];
     }
@@ -1521,13 +1533,21 @@ enum {
     
     // enlarge/shrinken stack
     [self updateViewControllerSizes];
-    [self updateViewControllerMasksAndShadow];    
+    [self updateViewControllerMasksAndShadow];
     [self alignStackAnimated:NO];
+    
+    if (IS_IOS7){
+        CGRect selfRect =self.view.frame;
+        selfRect.size.height -= 20;
+        selfRect.origin.y += 20;
+        self.rootViewController.view.frame = selfRect;
+        
+    }
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
-
+    
     [self.rootViewController willMoveToParentViewController:nil];
     [self.rootViewController.view removeFromSuperview];
     self.rootViewController.view = nil;
@@ -1556,7 +1576,7 @@ enum {
         [self updateViewControllerSizes];
         [self updateViewControllerMasksAndShadow];
     }
-
+    
     // ensure we're correctly aligned (may be messed up in willAnimate, if panRecognizer is still active)
     [self alignStackAnimated:!self.isReducingAnimations];
 }
@@ -1566,7 +1586,7 @@ enum {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     if (!self.isReducingAnimations) {
         [self updateViewControllerSizes];
-        [self updateViewControllerMasksAndShadow];    
+        [self updateViewControllerMasksAndShadow];
     }
     
     
