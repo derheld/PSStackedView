@@ -248,12 +248,12 @@ typedef void(^PSSVSimpleBlock)(void);
     NSInteger firstVisibleIndex = floorf(self.floatIndex);
     return firstVisibleIndex;
 }
-#define IS_IOS7 [[UIDevice currentDevice].systemVersion hasPrefix:@"7"]
+#define IS_GREATER_OR_EQUALS_IOS7 [[[UIDevice currentDevice].systemVersion substringToIndex:1] integerValue] >= 7
 
 - (CGRect)viewRect {
     // self.view.frame not used, it's wrong in viewWillAppear
     CGRect viewRect = [[UIScreen mainScreen] applicationFrame];
-    if (IS_IOS7){
+    if (IS_GREATER_OR_EQUALS_IOS7){
         viewRect.size.height -= 20;
     }
     
@@ -619,7 +619,7 @@ enum {
     }
     
     // hide menu, if first VC is larger than available screen space with floatIndex = 0.0
-    else if (index == 0 && [self.viewControllers count] /*&& [[self.viewControllers objectAtIndex:0] containerView].width >= ([self screenWidth] - self.leftInset)*/) {
+    else if (index == 0 && [self.viewControllers count] && [[self.viewControllers objectAtIndex:0] containerView].width >= ([self screenWidth] - self.leftInset)) {
         self.floatIndex = 0.5f;
         [self alignStackAnimated:YES];
     }
@@ -1050,7 +1050,7 @@ enum {
     if (stackWidth > 0.f) {
         viewController.view.width = stackWidth;
     }
-    if (IS_IOS7){
+    if (IS_GREATER_OR_EQUALS_IOS7){
         CGRect viewRect = viewController.view.frame;
         viewRect.origin.y += 20;
         viewController.view.frame = viewRect;
@@ -1535,7 +1535,7 @@ enum {
     [self updateViewControllerMasksAndShadow];
     [self alignStackAnimated:NO];
     
-    if (IS_IOS7){
+    if (IS_GREATER_OR_EQUALS_IOS7){
         CGRect selfRect =self.view.frame;
         selfRect.size.height -= 20;
         selfRect.origin.y += 20;
