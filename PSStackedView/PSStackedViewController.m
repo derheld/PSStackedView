@@ -249,7 +249,7 @@ typedef void(^PSSVSimpleBlock)(void);
     return firstVisibleIndex;
 }
 #define IS_GREATER_OR_EQUALS_IOS7 [[[UIDevice currentDevice].systemVersion substringToIndex:1] integerValue] >= 7
-
+#define OS_IS_LOWER_IOS8 [[[UIDevice currentDevice].systemVersion substringToIndex:1] integerValue] < 8
 - (CGRect)viewRect {
     // self.view.frame not used, it's wrong in viewWillAppear
     CGRect viewRect = [[UIScreen mainScreen] applicationFrame];
@@ -263,13 +263,19 @@ typedef void(^PSSVSimpleBlock)(void);
 // return screen width
 - (CGFloat)screenWidth {
     CGRect viewRect = [self viewRect];
-    CGFloat screenWidth = PSIsLandscape() ? viewRect.size.height : viewRect.size.width;
+    CGFloat screenWidth = viewRect.size.width;
+    if (OS_IS_LOWER_IOS8) {
+        screenWidth = PSIsLandscape() ? viewRect.size.height : viewRect.size.width;
+    }
     return screenWidth;
 }
 
 - (CGFloat)screenHeight {
     CGRect viewRect = [self viewRect];
-    NSUInteger screenHeight = PSIsLandscape() ? viewRect.size.width : viewRect.size.height;
+    CGFloat screenHeight = viewRect.size.height;
+    if (OS_IS_LOWER_IOS8) {
+        screenHeight = PSIsLandscape() ? viewRect.size.width : viewRect.size.height;
+    }
     return screenHeight;
 }
 
