@@ -37,12 +37,12 @@ typedef void(^PSSVSimpleBlock)(void);
     NSInteger lastVisibleIndexBeforeRotation_;
     BOOL enableBounces_;
     struct {
-        unsigned int delegateWillInsertViewController:1;
-        unsigned int delegateDidInsertViewController:1;
-        unsigned int delegateWillRemoveViewController:1;
-        unsigned int delegateDidRemoveViewController:1;
-        unsigned int delegateDidPanViewController:1;
-        unsigned int delegateDidAlign:1;
+        NSUInteger delegateWillInsertViewController:1;
+        NSUInteger delegateDidInsertViewController:1;
+        NSUInteger delegateWillRemoveViewController:1;
+        NSUInteger delegateDidRemoveViewController:1;
+        NSUInteger delegateDidPanViewController:1;
+        NSUInteger delegateDidAlign:1;
     }delegateFlags_;
 }
 
@@ -562,7 +562,7 @@ enum {
     NSMutableArray *modifiedFrames = [NSMutableArray arrayWithArray:frames];
     
     CGRect prevFrame;
-    for (int i = index; i < [modifiedFrames count]; i++) {
+    for (NSInteger i = index; i < [modifiedFrames count]; i++) {
         CGRect vcFrame = [[modifiedFrames objectAtIndex:i] CGRectValue];
         if (i == index) {
             vcFrame.origin.x = newLeft;
@@ -682,9 +682,9 @@ enum {
         }
         
         // remove left shadow for overlapped controller
-        int from = self.viewControllers.count-1;
-        int cleft = 10000;
-        for (int i = from; i >= 0; i--)
+        NSInteger from = self.viewControllers.count-1;
+        NSInteger cleft = 10000;
+        for (NSInteger i = from; i >= 0; i--)
         {
             UIViewController *cvc = [[self viewControllers] objectAtIndex:i];
             if (cvc.containerView.left == cleft)
@@ -827,12 +827,12 @@ enum {
             
             if (enableDraggingPastInsets_ == NO)
             {
-                int stackWidth = (!isTopViewController) ? 0 : (leftViewController) ? leftViewController.view.frame.size.width : (rightViewController) ? rightViewController.view.frame.size.width : 0;
-                int padding  = 45;
-                if ((int)(currentVCLeftPosition-stackWidth) <= (int)leftInset_ ) {
+                NSInteger stackWidth = (!isTopViewController) ? 0 : (leftViewController) ? leftViewController.view.frame.size.width : (rightViewController) ? rightViewController.view.frame.size.width : 0;
+                NSInteger padding  = 45;
+                if ((NSInteger)(currentVCLeftPosition-stackWidth) <= (int)leftInset_ ) {
                     currentVCLeftPosition = leftInset_ + stackWidth;
                 }
-                else if ((int)(currentVCLeftPosition-stackWidth) >= (int)largeLeftInset_ + padding) {
+                else if ((NSInteger)(currentVCLeftPosition-stackWidth) >= (NSInteger)largeLeftInset_ + padding) {
                     //For a more natural
                     currentVCLeftPosition = largeLeftInset_ + stackWidth + padding;
                 }
