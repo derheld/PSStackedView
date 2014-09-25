@@ -32,7 +32,7 @@ typedef void(^PSSVSimpleBlock)(void);
     // internal drag state handling and other messy details
     PSSVSnapOption lastDragOption_;
     BOOL snapBackFromLeft_;
-    NSInteger lastDragOffset_;
+    int lastDragOffset_;
     BOOL lastDragDividedOne_;
     NSInteger lastVisibleIndexBeforeRotation_;
     BOOL enableBounces_;
@@ -375,7 +375,7 @@ enum {
 }typedef PSSVRoundOption;
 
 - (BOOL)isFloatIndexBetween:(CGFloat)floatIndex {
-    CGFloat intIndex, restIndex;
+    float intIndex, restIndex;
     restIndex = modff(floatIndex, &intIndex);
     BOOL isBetween = fabsf(restIndex - 0.5f) < EPSILON;
     return isBetween;
@@ -392,7 +392,7 @@ enum {
             isValid = contentWidth > [self screenWidth] - self.largeLeftInset;
         }else {
             NSUInteger stackCount = [self.viewControllers count];
-            CGFloat intIndex, restIndex;
+            float intIndex, restIndex;
             restIndex = modff(floatIndex, &intIndex); // split e.g. 1.5 in 1.0 and 0.5
             isValid = stackCount > intIndex && contentWidth > ([self screenWidth] - self.leftInset);
             if (isValid && fabsf(restIndex - 0.5f) < EPSILON) {  // comparing floats -> if so, we have a .5 here
@@ -411,7 +411,7 @@ enum {
 
 - (CGFloat)nearestValidFloatIndex:(CGFloat)floatIndex round:(PSSVRoundOption)roundOption {
     CGFloat roundedFloat;
-    CGFloat intIndex, restIndex;
+    float intIndex, restIndex;
     restIndex = modff(floatIndex, &intIndex);
     
     if (restIndex < 0.5f) {
@@ -783,7 +783,7 @@ enum {
 
 // moves the stack to a specific offset.
 - (void)moveStackWithOffset:(NSInteger)offset animated:(BOOL)animated userDragging:(BOOL)userDragging {
-    PSSVLog(@"moving stack on %d pixels (animated:%d, decellerating:%d)", offset, animated, userDragging);
+    PSSVLog(@"moving stack on %ld pixels (animated:%d, decellerating:%d)", (long)offset, animated, userDragging);
     
     // let the delegate know the user is moving the stack
     if (self.delegate && userDragging) {
@@ -901,7 +901,7 @@ enum {
         lastDragOffset_ = 0;
     }
     
-    NSInteger offset = translatedPoint.x - lastDragOffset_;
+    int offset = translatedPoint.x - lastDragOffset_;
     
     // if the move does not make sense (no snapping region), only use 1/2 offset
     BOOL snapPointAvailable = [self snapPointAvailableAfterOffset:offset];
@@ -966,7 +966,7 @@ enum {
 
 - (PSSVSnapOption)snapOptionFromOffset:(NSInteger)offset {
 	if (self.alwaysSnapToNearest) {
-		return PSSVRoundNearest;
+		return (PSSVSnapOption)PSSVRoundNearest;
 	}
     
 	if (offset > 0) {
@@ -1025,7 +1025,7 @@ enum {
         [self.viewControllers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             UIViewController *baseVC = objc_getAssociatedObject(obj, kPSSVAssociatedBaseViewControllerKey);
             if (baseVC == baseViewController) {
-                PSSVLog(@"BaseViewController found on index: %d", idx);
+                PSSVLog(@"BaseViewController found on index: %lu", (unsigned long)idx);
                 UIViewController *parentVC = [self previousViewController:obj];
                 if (parentVC) {
                     [self popToViewController:parentVC animated:animated];
@@ -1040,7 +1040,7 @@ enum {
     }
     
     [self addChildViewController:viewController];
-    PSSVLog(@"pushing with index %d on stack: %@ (animated: %d)", [self.viewControllers count], viewController, animated);
+    PSSVLog(@"pushing with index %lu on stack: %@ (animated: %d)", (unsigned long)[self.viewControllers count], viewController, animated);
     viewController.view.height = [self screenHeight];
     
     [viewController view]; //trigger viewDidload to ensure we get stack width
@@ -1125,7 +1125,7 @@ enum {
 }
 
 - (UIViewController *)popViewControllerAnimated:(BOOL)animated; {
-    PSSVLog(@"popping controller: %@ (#%d total, animated:%d)", [self topViewController], [self.viewControllers count], animated);
+    PSSVLog(@"popping controller: %@ (#%lu total, animated:%d)", [self topViewController], (unsigned long)[self.viewControllers count], animated);
     
     UIViewController *lastController = [self topViewController];
     if (lastController) {
@@ -1203,7 +1203,7 @@ enum {
     if (NSNotFound == index) {
         return nil;
     }
-    PSSVLog(@"popping to index %d, from %d", index, [self.viewControllers count]);
+    PSSVLog(@"popping to index %lu, from %lu", (unsigned long)index, (unsigned long)[self.viewControllers count]);
     
     NSArray *controllersToRemove = [self viewControllersAfterViewController:viewController];
     [controllersToRemove enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
@@ -1326,7 +1326,7 @@ enum {
                 bounceAtVeryEnd = YES;
             }
             
-            PSSVLog(@"bouncing with offset: %d, firstIndex:%d, snapToLeft:%d veryEnd:%d", snapOverOffset, firstVisibleIndex, snapOverOffset<0, bounceAtVeryEnd);
+            PSSVLog(@"bouncing with offset: %ld, firstIndex:%lu, snapToLeft:%d veryEnd:%d", (long)snapOverOffset, (unsigned long)firstVisibleIndex, snapOverOffset<0, bounceAtVeryEnd);
         }
         
         // iterate over all view controllers and snap them to their correct positions
@@ -1438,7 +1438,7 @@ enum {
 
 
 - (NSUInteger)collapseStack:(NSInteger)steps animated:(BOOL)animated; { // (<--- increases firstVisibleIndex)
-    PSSVLog(@"collapsing stack with %d steps [%d-%d]", steps, self.firstVisibleIndex, self.lastVisibleIndex);
+    PSSVLog(@"collapsing stack with %ld steps [%ld-%ld]", (long)steps, (long)self.firstVisibleIndex, (long)self.lastVisibleIndex);
     
     CGFloat newFloatIndex = self.floatIndex;
     while (steps > 0) {
@@ -1468,8 +1468,8 @@ enum {
 }
 
 - (NSUInteger)expandStack:(NSInteger)steps animated:(BOOL)animated; { // (---> decreases firstVisibleIndex)
-    steps = abs(steps); // normalize
-    PSSVLog(@"expanding stack with %d steps [%d-%d]", steps, self.firstVisibleIndex, self.lastVisibleIndex);
+    steps = abs((int)steps); // normalize
+    PSSVLog(@"expanding stack with %ld steps [%ld-%ld]", (long)steps, (long)self.firstVisibleIndex, (long)self.lastVisibleIndex);
     
     CGFloat newFloatIndex = self.floatIndex;
     while (steps > 0) {
