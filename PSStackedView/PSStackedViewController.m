@@ -252,12 +252,15 @@ typedef void(^PSSVSimpleBlock)(void);
 #define OS_IS_LOWER_IOS8 [[[UIDevice currentDevice].systemVersion substringToIndex:1] integerValue] < 8
 - (CGRect)viewRect {
     // self.view.frame not used, it's wrong in viewWillAppear
-    CGRect viewRect = [[UIScreen mainScreen] applicationFrame];
-    if (IS_GREATER_OR_EQUALS_IOS7){
-        viewRect.size.height -= 20;
+    CGRect screenBounds = [UIScreen mainScreen].bounds;
+    CGRect portraitScreenBounds = screenBounds;
+    
+    if ((NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_7_1) && (PSIsLandscape())) {
+        portraitScreenBounds.size.width = screenBounds.size.height;
+        portraitScreenBounds.size.height = screenBounds.size.width;
     }
     
-    return viewRect;
+    return portraitScreenBounds;
 }
 
 // return screen width
